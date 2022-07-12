@@ -2,9 +2,10 @@
 pragma solidity ^0.8.13;
 
 contract BitPackedMap {
+    mapping(uint256 => bytes32) bitmaps;
+    
     // Given a value for a square, return the corresponding fill rgb hex string
-    // TODO: Make visibility internal
-    function getFillFromSquare(uint256 square) public pure returns (string memory) {
+    function getFillFromSquare(uint256 square) internal pure returns (string memory) {
         uint256 r;
         uint256 g;
         uint256 b;
@@ -23,18 +24,16 @@ contract BitPackedMap {
         return string(abi.encodePacked("#", uintToHexString(r), uintToHexString(g), uintToHexString(b)));
     }
 
-    // Returns bits corresponding to a square from the bitmap
-    // TODO: Make visibility internal
-    function getSquareFromMap(bytes32 bitmap, uint256 index) public pure returns (uint256 square) {
+    // Returns bits corresponding to a square from the bitmap// TODO: Make visibility internal
+    function getSquareFromMap(bytes32 bitmap, uint256 index) internal pure returns (uint256 square) {
         assembly {
             let shift := mul(index, 4)
             square := shr(shift, and(shl(shift, shr(0xFC, not(0))), bitmap))
         }
     }
 
-    // Returns svg string corresponding to a 32 byte bitmap
-    // TODO: Make visibility internal
-    function renderSvg(bytes32 bitmap) public pure returns (string memory) {
+    // Returns svg string corresponding to a 32 byte bitmap// TODO: Make visibility internal
+    function renderSvg(bytes32 bitmap) internal pure returns (string memory) {
         string memory svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8 8">';
 
         string[8] memory pixelRow;
@@ -63,7 +62,7 @@ contract BitPackedMap {
 
     // Returns svg string corresponding to a specific tokenId
     function tokenSvg(uint256 tokenId) public view returns (string memory) {
-
+        return renderSvg(bitmaps[tokenId]);
     }
 
     // SOURCE: https://etherscan.io/address/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63#code
