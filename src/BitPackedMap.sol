@@ -2,8 +2,16 @@
 pragma solidity ^0.8.13;
 
 contract BitPackedMap {
+    // =======
+    // STORAGE
+    // =======
+
     mapping(uint256 => bytes32) bitmaps;
     
+    // ================
+    // INTERNAL METHODS
+    // ================
+
     // Given a value for a square, return the corresponding fill rgb hex string
     function getFillFromSquare(uint256 square) internal pure returns (string memory) {
         uint256 r;
@@ -59,6 +67,14 @@ contract BitPackedMap {
         svgString = string(abi.encodePacked(svgString, "</svg>"));
         return svgString;
     }
+
+    function addBitmap(uint256 tokenId, bytes32 bitmap) internal {
+        bitmaps[tokenId] = bitmap;
+    }
+
+    // ==============
+    // PUBLIC METHODS
+    // ==============
 
     // Returns svg string corresponding to a specific tokenId
     function tokenSvg(uint256 tokenId) public view returns (string memory) {
