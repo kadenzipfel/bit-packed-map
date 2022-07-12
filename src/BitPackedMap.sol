@@ -34,9 +34,31 @@ contract BitPackedMap {
 
     // Returns svg string corresponding to a 32 byte bitmap
     // TODO: Make visibility internal
-    function renderSvg(bytes32 bitmap) public view returns (string memory) {
-        // string memory svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8 8">';
+    function renderSvg(bytes32 bitmap) public pure returns (string memory) {
+        string memory svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8 8">';
 
+        string[8] memory pixelRow;
+
+        uint256 y = 0;
+        for (uint i; i < 64; i += 8) {
+            pixelRow[0] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i)), '" x="0" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[1] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 1)), '" x="1" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[2] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 2)), '" x="2" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[3] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 3)), '" x="3" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[4] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 4)), '" x="4" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[5] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 5)), '" x="5" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[6] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 6)), '" x="6" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[7] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 7)), '" x="7" y="', toString(y), '" width="1" height="1" />'));
+            
+            svgString = string(abi.encodePacked(svgString, pixelRow[0], pixelRow[1], pixelRow[2], pixelRow[3], pixelRow[4], pixelRow[5], pixelRow[6], pixelRow[7]));
+
+            unchecked {
+                ++y;
+            }
+        }
+
+        svgString = string(abi.encodePacked(svgString, "</svg>"));
+        return svgString;
     }
 
     // Returns svg string corresponding to a specific tokenId
@@ -76,5 +98,28 @@ contract BitPackedMap {
             return string(abi.encodePacked("0", str));
         }
         return str;
+    }
+
+    // SOURCE: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/3210a8653b66726114226ee5153bbcf59b0475bd/contracts/utils/Strings.sol#L16
+    function toString(uint256 value) internal pure returns (string memory) {
+        // Inspired by OraclizeAPI's implementation - MIT licence
+        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
     }
 }
