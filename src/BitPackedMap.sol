@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+/// @title BitPackedMap
+/// @author https://github.com/kadenzipfel
+/// @notice Bitpacked 8x8 bitmap
 contract BitPackedMap {
     mapping(uint256 => bytes32) bitmaps;
 
-    // Given a value for a square, return the corresponding fill rgb hex string
+    /// @notice Given a value for a square, return the corresponding fill rgb hex string.
+    ///         First bit halves all red green and blue values if == 1.
+    ///         Bits #2-4 correspond to 1 byte values for each of red, green and blue.
+    /// @param  square 4 bit uint denoting the color of the square.
+    /// @return fill rgb hex string corresponding to square.
     function _getFillFromSquare(uint256 square) internal pure returns (string memory) {
         uint256 r;
         uint256 g;
@@ -24,7 +31,10 @@ contract BitPackedMap {
         return string(abi.encodePacked("#", _uintToHexString(r), _uintToHexString(g), _uintToHexString(b)));
     }
 
-    // Returns bits corresponding to a square from the bitmap
+    /// @notice Given a bitmap and index, returns bits corresponding to the square at index.
+    /// @param  bitmap 32 byte value containing all bitmap data.
+    /// @param  index index of square being retrieved.
+    /// @return square 4 bit uint denoting the color of the square.
     function _getSquareFromMap(bytes32 bitmap, uint256 index) internal pure returns (uint256 square) {
         assembly {
             let shift := mul(index, 4)
@@ -32,7 +42,9 @@ contract BitPackedMap {
         }
     }
 
-    // Returns svg string corresponding to a 32 byte bitmap
+    /// @notice Given a bitmap, returns corresponding svg string.
+    /// @param  bitmap 32 byte value containing all bitmap data.
+    /// @return svg string to display bitmap.
     function _renderSvg(bytes32 bitmap) public pure returns (string memory) {
         string memory svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8 8">';
 
@@ -60,12 +72,16 @@ contract BitPackedMap {
         return svgString;
     }
 
-    // Add a bitmap to a corresponding tokenId
+    /// @notice Add a bitmap to a corresponding tokenId.
+    /// @param  tokenId ID of token to add a bitmap to.
+    /// @param  bitmap 32 byte value containing all bitmap data.
     function _addBitmap(uint256 tokenId, bytes32 bitmap) internal virtual {
         bitmaps[tokenId] = bitmap;
     }
 
-    // Returns svg string corresponding to a specific tokenId
+    /// @notice Given a tokenId, returns corresponding bitmap svg string.
+    /// @param  tokenId ID of token to retrieve bitmap svg string.
+    /// @return svg string to display bitmap.
     function tokenSvg(uint256 tokenId) public view returns (string memory) {
         return _renderSvg(bitmaps[tokenId]);
     }
