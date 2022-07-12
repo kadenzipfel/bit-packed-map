@@ -2,18 +2,10 @@
 pragma solidity ^0.8.13;
 
 contract BitPackedMap {
-    // =======
-    // STORAGE
-    // =======
-
     mapping(uint256 => bytes32) bitmaps;
-    
-    // ================
-    // INTERNAL METHODS
-    // ================
 
     // Given a value for a square, return the corresponding fill rgb hex string
-    function getFillFromSquare(uint256 square) internal pure returns (string memory) {
+    function _getFillFromSquare(uint256 square) internal pure returns (string memory) {
         uint256 r;
         uint256 g;
         uint256 b;
@@ -32,30 +24,30 @@ contract BitPackedMap {
         return string(abi.encodePacked("#", uintToHexString(r), uintToHexString(g), uintToHexString(b)));
     }
 
-    // Returns bits corresponding to a square from the bitmap// TODO: Make visibility internal
-    function getSquareFromMap(bytes32 bitmap, uint256 index) internal pure returns (uint256 square) {
+    // Returns bits corresponding to a square from the bitmap
+    function _getSquareFromMap(bytes32 bitmap, uint256 index) internal pure returns (uint256 square) {
         assembly {
             let shift := mul(index, 4)
             square := shr(shift, and(shl(shift, shr(0xFC, not(0))), bitmap))
         }
     }
 
-    // Returns svg string corresponding to a 32 byte bitmap// TODO: Make visibility internal
-    function renderSvg(bytes32 bitmap) internal pure returns (string memory) {
+    // Returns svg string corresponding to a 32 byte bitmap
+    function _renderSvg(bytes32 bitmap) public pure returns (string memory) {
         string memory svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8 8">';
 
         string[8] memory pixelRow;
 
         uint256 y = 0;
         for (uint i; i < 64; i += 8) {
-            pixelRow[0] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i)), '" x="0" y="', toString(y), '" width="1" height="1" />'));
-            pixelRow[1] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 1)), '" x="1" y="', toString(y), '" width="1" height="1" />'));
-            pixelRow[2] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 2)), '" x="2" y="', toString(y), '" width="1" height="1" />'));
-            pixelRow[3] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 3)), '" x="3" y="', toString(y), '" width="1" height="1" />'));
-            pixelRow[4] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 4)), '" x="4" y="', toString(y), '" width="1" height="1" />'));
-            pixelRow[5] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 5)), '" x="5" y="', toString(y), '" width="1" height="1" />'));
-            pixelRow[6] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 6)), '" x="6" y="', toString(y), '" width="1" height="1" />'));
-            pixelRow[7] = string(abi.encodePacked('<rect fill="', getFillFromSquare(getSquareFromMap(bitmap, i + 7)), '" x="7" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[0] = string(abi.encodePacked('<rect fill="', _getFillFromSquare(_getSquareFromMap(bitmap, i)), '" x="0" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[1] = string(abi.encodePacked('<rect fill="', _getFillFromSquare(_getSquareFromMap(bitmap, i + 1)), '" x="1" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[2] = string(abi.encodePacked('<rect fill="', _getFillFromSquare(_getSquareFromMap(bitmap, i + 2)), '" x="2" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[3] = string(abi.encodePacked('<rect fill="', _getFillFromSquare(_getSquareFromMap(bitmap, i + 3)), '" x="3" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[4] = string(abi.encodePacked('<rect fill="', _getFillFromSquare(_getSquareFromMap(bitmap, i + 4)), '" x="4" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[5] = string(abi.encodePacked('<rect fill="', _getFillFromSquare(_getSquareFromMap(bitmap, i + 5)), '" x="5" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[6] = string(abi.encodePacked('<rect fill="', _getFillFromSquare(_getSquareFromMap(bitmap, i + 6)), '" x="6" y="', toString(y), '" width="1" height="1" />'));
+            pixelRow[7] = string(abi.encodePacked('<rect fill="', _getFillFromSquare(_getSquareFromMap(bitmap, i + 7)), '" x="7" y="', toString(y), '" width="1" height="1" />'));
             
             svgString = string(abi.encodePacked(svgString, pixelRow[0], pixelRow[1], pixelRow[2], pixelRow[3], pixelRow[4], pixelRow[5], pixelRow[6], pixelRow[7]));
 
@@ -68,17 +60,14 @@ contract BitPackedMap {
         return svgString;
     }
 
-    function addBitmap(uint256 tokenId, bytes32 bitmap) internal {
+    // Add a bitmap to a corresponding tokenId
+    function _addBitmap(uint256 tokenId, bytes32 bitmap) internal virtual {
         bitmaps[tokenId] = bitmap;
     }
 
-    // ==============
-    // PUBLIC METHODS
-    // ==============
-
     // Returns svg string corresponding to a specific tokenId
     function tokenSvg(uint256 tokenId) public view returns (string memory) {
-        return renderSvg(bitmaps[tokenId]);
+        return _renderSvg(bitmaps[tokenId]);
     }
 
     // SOURCE: https://etherscan.io/address/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63#code
