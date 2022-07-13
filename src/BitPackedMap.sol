@@ -39,7 +39,7 @@ contract BitPackedMap {
     /// @return square 4 bit uint denoting the color of the square.
     function _getSquareFromMap(bytes32 bitmap, uint256 index) internal pure returns (uint256 square) {
         assembly {
-            let shift := mul(index, 4)
+            let shift := sub(252, mul(index, 4))
             square := shr(shift, and(shl(shift, shr(0xFC, not(0))), bitmap))
         }
     }
