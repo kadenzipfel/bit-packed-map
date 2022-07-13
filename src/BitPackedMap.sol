@@ -8,27 +8,29 @@ contract BitPackedMap {
     mapping(uint256 => bytes32) bitmaps;
 
     /// @notice Given a value for a square, return the corresponding fill rgb hex string.
-    ///         First bit halves all red green and blue values if == 1.
-    ///         Bits #2-4 correspond to 1 byte values for each of red, green and blue.
     /// @param  square 4 bit uint denoting the color of the square.
     /// @return fill rgb hex string corresponding to square.
     function _getFillFromSquare(uint256 square) internal pure returns (string memory) {
-        uint256 r;
-        uint256 g;
-        uint256 b;
-        assembly {
-            let firstBit := shr(0x03, square)
-            r := mul(mod(shr(0x02, square), 2), 0xFF)
-            g := mul(mod(shr(0x01, square), 2), 0xFF)
-            b := mul(mod(square, 2), 0xFF)
+        string[16] memory colors = [
+            "#ffffff",
+            "#aaaaaa",
+            "#555555",
+            "#000000",
+            "#ffff55",
+            "#00aa00",
+            "#55ff55",
+            "#ff5555",
+            "#aa0000",
+            "#aa5500",
+            "#aa00aa",
+            "#ff55ff",
+            "#55ffff",
+            "#00aaaa",
+            "#0000aa",
+            "#5555ff"
+        ];
 
-            if eq(firstBit, 1) {
-                r := div(r, 2)
-                g := div(g, 2)
-                b := div(b, 2)
-            }
-        }
-        return string(abi.encodePacked("#", _uintToHexString(r), _uintToHexString(g), _uintToHexString(b)));
+        return colors[square];
     }
 
     /// @notice Given a bitmap and index, returns bits corresponding to the square at index.
