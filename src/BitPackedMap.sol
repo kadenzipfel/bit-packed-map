@@ -47,7 +47,7 @@ contract BitPackedMap {
     /// @notice Given a bitmap, returns corresponding svg string.
     /// @param  bitmap 32 byte value containing all bitmap data.
     /// @return svg string to display bitmap.
-    function _renderSvg(bytes32 bitmap) public pure returns (string memory) {
+    function _renderSvg(bytes32 bitmap) internal pure returns (string memory) {
         string memory svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 8 8">';
 
         string[8] memory pixelRow;
